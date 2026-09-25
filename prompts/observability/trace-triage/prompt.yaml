@@ -4,7 +4,7 @@ version: 1.0.0
 description: >
   Reads an exported OpenTelemetry trace (spans as JSON or a flattened table) and returns a
   root-cause hypothesis, the critical path, and concrete next diagnostic steps.
-owner: "@gregory-douglas"
+owner: "@gregorywdouglas"
 status: stable
 tags: [opentelemetry, w3c-trace-context, observability, incident-response]
 

@@ -5,7 +5,7 @@ description: >
   Analyzes a BizTalk orchestration (ODX export or XLANG/s description) and produces a
   structured migration assessment targeting Azure Logic Apps Standard, with risks and
   pattern mappings as JSON.
-owner: "@gregory-douglas"
+owner: "@gregorywdouglas"
 status: stable
 tags: [biztalk, logic-apps, migration, azure-integration-services]
 

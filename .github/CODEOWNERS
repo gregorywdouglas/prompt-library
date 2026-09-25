@@ -1,4 +1,4 @@
 # Default owner for everything; override per domain as the library grows.
-*                        @gregory-douglas
-/prompts/integration/    @gregory-douglas
-/prompts/observability/  @gregory-douglas
+*                        @gregorywdouglas
+/prompts/integration/    @gregorywdouglas
+/prompts/observability/  @gregorywdouglas

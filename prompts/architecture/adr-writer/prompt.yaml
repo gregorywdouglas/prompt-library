@@ -4,7 +4,7 @@ version: 0.2.0
 description: >
   Turns meeting notes or a rough decision description into a well-formed ADR (MADR style)
   with options considered, consequences, and explicit open items.
-owner: "@gregory-douglas"
+owner: "@gregorywdouglas"
 status: experimental
 tags: [architecture, adr, documentation]
 

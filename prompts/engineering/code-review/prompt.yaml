@@ -4,7 +4,7 @@ version: 1.0.0
 description: >
   Reviews a diff or file the way a senior engineer would: correctness and security first,
   then reliability and maintainability; findings ranked by severity with fixes.
-owner: "@gregory-douglas"
+owner: "@gregorywdouglas"
 status: stable
 tags: [code-review, security, dotnet, quality]
 

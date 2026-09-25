@@ -4,7 +4,7 @@ version: 0.1.0
 description: >
   Meta-prompt that drafts a production system prompt for a tool-using agent from a short
   brief: role, tools, guardrails, output contract, and escalation rules.
-owner: "@gregory-douglas"
+owner: "@gregorywdouglas"
 status: draft
 tags: [agents, meta-prompt, system-prompt]
 
