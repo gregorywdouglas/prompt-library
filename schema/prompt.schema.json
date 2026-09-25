@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/prompt-library/schema/prompt.schema.json",
+  "title": "Prompt Definition",
+  "description": "A versioned, testable prompt asset.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "version", "description", "owner", "status", "model", "variables", "template"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$",
+      "description": "Dotted, globally unique id: <domain>.<prompt-name>. Must match folder path."
+    },
+    "name": { "type": "string", "minLength": 3 },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "SemVer. MAJOR = variable/contract change, MINOR = behavior change, PATCH = wording fix."
+    },
+    "description": { "type": "string", "minLength": 10 },
+    "owner": { "type": "string" },
+    "status": { "enum": ["draft", "experimental", "stable", "deprecated"] },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "name"],
+      "properties": {
+        "provider": { "enum": ["anthropic", "openai", "azure-openai", "any"] },
+        "name": { "type": "string" },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+        "max_tokens": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$" },
+          "description": { "type": "string" },
+          "required": { "type": "boolean", "default": true },
+          "default": {}
+        }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user"],
+      "properties": {
+        "system": { "type": "string" },
+        "user": { "type": "string" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": { "enum": ["text", "markdown", "json", "xml"] },
+        "json_schema": { "type": "object" }
+      }
+    },
+    "changelog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "date", "notes"],
+        "properties": {
+          "version": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

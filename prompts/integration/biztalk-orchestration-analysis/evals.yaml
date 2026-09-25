@@ -1,0 +1,28 @@
+cases:
+  - name: correlated-convoy-flags-sessions
+    vars:
+      orchestration: |
+        Orchestration "OrderAggregator". Activating Receive of PurchaseOrder (correlation set
+        on OrderId). Loop: Listen shape with Receive of OrderLine (follows correlation OrderId)
+        and a 30-minute Delay. After loop, Transform (map PO_to_Invoice) and Send to InvoicePort.
+      bindings: "Receive: WCF-SQL polling. Send: FILE adapter to \\\\share\\invoices."
+    assert:
+      - type: is_json
+      - type: contains
+        value: session
+      - type: json_schema
+        value:
+          type: object
+          required: [summary, complexity, shape_mappings, risks, open_questions, estimated_effort_days]
+
+  - name: atomic-scope-is-called-out
+    vars:
+      orchestration: |
+        Orchestration "PaymentPost". Receive Payment. Atomic scope containing two Send shapes
+        to SQL (Ledger and AuditLog) enlisted in an MSDTC transaction. Send ack.
+    assert:
+      - type: is_json
+      - type: regex
+        value: "idempoten|outbox"
+      - type: not_contains
+        value: "MSDTC is supported"

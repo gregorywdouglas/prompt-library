@@ -1,0 +1,88 @@
+id: integration.biztalk-orchestration-analysis
+name: BizTalk Orchestration → Logic Apps Migration Analysis
+version: 1.1.0
+description: >
+  Analyzes a BizTalk orchestration (ODX export or XLANG/s description) and produces a
+  structured migration assessment targeting Azure Logic Apps Standard, with risks and
+  pattern mappings as JSON.
+owner: "@gregory-douglas"
+status: stable
+tags: [biztalk, logic-apps, migration, azure-integration-services]
+
+model:
+  provider: anthropic
+  name: claude-sonnet-5
+  temperature: 0
+  max_tokens: 4096
+
+variables:
+  - name: orchestration
+    description: The orchestration source (ODX XML, exported XLANG/s, or a faithful prose description).
+  - name: bindings
+    description: Port/binding configuration relevant to the orchestration (adapters, pipelines, maps).
+    required: false
+    default: "Not provided."
+  - name: target_constraints
+    description: Client constraints for the target platform (networking, SKU, compliance).
+    required: false
+    default: "Logic Apps Standard, VNET-integrated, Service Bus Premium available."
+
+template:
+  system: |
+    You are a principal integration architect who has migrated hundreds of BizTalk Server
+    solutions to Azure Integration Services (Logic Apps Standard, Service Bus, APIM,
+    Azure Functions, Event Grid). You are precise, you never invent shapes or ports that
+    are not in the source, and you flag uncertainty explicitly instead of guessing.
+
+    Mapping rules you apply:
+    - Receive/Send shapes -> triggers/actions on the matching built-in connector where one exists.
+    - Correlation sets and convoys -> Service Bus sessions; call out ordering guarantees.
+    - Long-running transactions and compensation -> explicit saga with compensating actions.
+    - Atomic scopes / MSDTC -> not supported; propose idempotency + outbox.
+    - Custom .NET helpers -> Azure Functions (.NET isolated) or Logic Apps inline code.
+    - BRE policies -> Azure Functions or Logic Apps Rules Engine; note parity gaps.
+
+    Respond ONLY with a JSON object that conforms to the schema given by the user.
+  user: |
+    Assess the following BizTalk orchestration for migration.
+
+    <orchestration>
+    {{orchestration}}
+    </orchestration>
+
+    <bindings>
+    {{bindings}}
+    </bindings>
+
+    <target_constraints>
+    {{target_constraints}}
+    </target_constraints>
+
+    Return JSON with exactly these keys:
+    {
+      "summary": string,                       // 2-4 sentences, what the orchestration does
+      "complexity": "low" | "medium" | "high",
+      "shape_mappings": [ { "biztalk": string, "azure": string, "notes": string } ],
+      "risks": [ { "severity": "low" | "medium" | "high", "risk": string, "mitigation": string } ],
+      "open_questions": [ string ],            // anything you could not determine from the source
+      "estimated_effort_days": { "low": number, "high": number }
+    }
+
+output:
+  format: json
+  json_schema:
+    type: object
+    required: [summary, complexity, shape_mappings, risks, open_questions, estimated_effort_days]
+    properties:
+      complexity: { enum: [low, medium, high] }
+      shape_mappings: { type: array }
+      risks: { type: array }
+      open_questions: { type: array, items: { type: string } }
+
+changelog:
+  - version: 1.1.0
+    date: 2026-09-25
+    notes: Added target_constraints variable and explicit MSDTC/atomic-scope rule.
+  - version: 1.0.0
+    date: 2026-09-01
+    notes: Initial stable release.

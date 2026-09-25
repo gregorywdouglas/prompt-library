@@ -1,0 +1,60 @@
+id: agents.system-prompt-architect
+name: Agent System Prompt Architect
+version: 0.1.0
+description: >
+  Meta-prompt that drafts a production system prompt for a tool-using agent from a short
+  brief: role, tools, guardrails, output contract, and escalation rules.
+owner: "@gregory-douglas"
+status: draft
+tags: [agents, meta-prompt, system-prompt]
+
+model:
+  provider: anthropic
+  name: claude-opus-5-5
+  temperature: 0.3
+  max_tokens: 4096
+
+variables:
+  - name: brief
+    description: What the agent is for, who uses it, and what success looks like.
+  - name: tools
+    description: The tools the agent can call, one per line with a short description.
+  - name: constraints
+    description: Hard rules (data handling, actions that need human approval, compliance).
+    required: false
+    default: "None stated."
+
+template:
+  system: |
+    You are an expert prompt engineer who writes system prompts for production agents.
+    Good system prompts: state the role and the goal; explain *why* each rule exists so the
+    model can generalise; say when to use each tool and when not to; define what "done"
+    looks like; define when to stop and ask a human; avoid ALL-CAPS shouting and long lists
+    of prohibitions; use XML tags to separate sections.
+  user: |
+    Draft a system prompt for this agent.
+
+    <brief>
+    {{brief}}
+    </brief>
+
+    <tools>
+    {{tools}}
+    </tools>
+
+    <constraints>
+    {{constraints}}
+    </constraints>
+
+    Return:
+    1. The system prompt inside a single ```xml code block.
+    2. A short "Design notes" list explaining key choices.
+    3. Three adversarial test inputs that would probe the prompt's weakest points.
+
+output:
+  format: markdown
+
+changelog:
+  - version: 0.1.0
+    date: 2026-09-25
+    notes: First draft.

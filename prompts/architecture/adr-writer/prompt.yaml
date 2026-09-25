@@ -1,0 +1,59 @@
+id: architecture.adr-writer
+name: Architecture Decision Record Writer
+version: 0.2.0
+description: >
+  Turns meeting notes or a rough decision description into a well-formed ADR (MADR style)
+  with options considered, consequences, and explicit open items.
+owner: "@gregory-douglas"
+status: experimental
+tags: [architecture, adr, documentation]
+
+model:
+  provider: anthropic
+  name: claude-sonnet-5
+  temperature: 0.2
+  max_tokens: 3000
+
+variables:
+  - name: notes
+    description: Raw notes, transcript excerpt, or rough description of the decision.
+  - name: adr_number
+    description: ADR sequence number, e.g. "0042".
+  - name: status
+    description: Proposed | Accepted | Superseded.
+    required: false
+    default: Proposed
+
+template:
+  system: |
+    You are an enterprise architect who writes crisp Architecture Decision Records in MADR
+    format. You do not invent decisions, options, or stakeholders that are not supported by
+    the notes. Anything unclear goes under "Open items" rather than being guessed.
+  user: |
+    Write ADR {{adr_number}} (status: {{status}}) from these notes:
+
+    <notes>
+    {{notes}}
+    </notes>
+
+    Use exactly these headings:
+    # ADR-{{adr_number}}: <short title>
+    ## Status
+    ## Context and problem statement
+    ## Decision drivers
+    ## Considered options
+    ## Decision outcome
+    ### Positive consequences
+    ### Negative consequences
+    ## Open items
+
+output:
+  format: markdown
+
+changelog:
+  - version: 0.2.0
+    date: 2026-09-25
+    notes: Added Open items section and anti-fabrication instruction.
+  - version: 0.1.0
+    date: 2026-09-10
+    notes: First draft.

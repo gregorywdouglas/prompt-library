@@ -1,0 +1,15 @@
+cases:
+  - name: service-bus-vs-event-grid
+    vars:
+      adr_number: "0007"
+      notes: |
+        Discussed messaging for claim events. Need ordering per claim and dead-lettering.
+        Event Grid is cheaper and push-based but no ordering. Service Bus Premium supports
+        sessions. Team leaning Service Bus. Cost owner (finance) not yet consulted.
+    assert:
+      - type: contains
+        value: "# ADR-0007"
+      - type: contains
+        value: "## Open items"
+      - type: regex
+        value: "finance|cost"

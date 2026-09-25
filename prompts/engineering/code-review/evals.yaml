@@ -1,0 +1,33 @@
+cases:
+  - name: sql-injection-is-critical
+    vars:
+      language: "C# .NET 8"
+      code: |
+        public async Task<Customer?> Get(string id) {
+            using var cmd = new SqlCommand($"SELECT * FROM Customers WHERE Id = '{id}'", _conn);
+            using var r = await cmd.ExecuteReaderAsync();
+            return r.Read() ? Map(r) : null;
+        }
+    assert:
+      - type: contains
+        value: "REQUEST CHANGES"
+      - type: regex
+        value: "sql injection"
+      - type: regex
+        value: "critical|high"
+
+  - name: clean-code-is-approved
+    vars:
+      language: "Python 3.12"
+      context: "Utility to clamp a value into a range."
+      code: |
+        def clamp(value: float, lo: float, hi: float) -> float:
+            """Return value limited to the inclusive range [lo, hi]."""
+            if lo > hi:
+                raise ValueError("lo must be <= hi")
+            return max(lo, min(value, hi))
+    assert:
+      - type: regex
+        value: "APPROVE"
+      - type: not_contains
+        value: "critical"

@@ -1,0 +1,14 @@
+cases:
+  - name: happy-path
+    vars:
+      input: "Replace with a realistic, synthetic example."
+    assert:
+      - type: contains
+        value: "expected phrase"
+
+  - name: known-failure-mode
+    vars:
+      input: "An input that tempts the model to guess or fabricate."
+    assert:
+      - type: not_contains
+        value: "fabricated detail"

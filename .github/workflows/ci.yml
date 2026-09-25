@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      prompt_id:
+        description: "Optional prompt id to live-eval (blank = all)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: Validate prompts
+        run: python tools/promptctl.py validate
+      - name: Offline evals
+        run: python tools/promptctl.py eval
+      - name: Catalog is up to date
+        run: |
+          python tools/promptctl.py catalog
+          git diff --exit-code CATALOG.md || (echo "::error::CATALOG.md is stale — run 'make catalog'"; exit 1)
+
+  live-eval:
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: evals
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Live evals
+        if: env.ANTHROPIC_API_KEY != ''
+        run: python tools/promptctl.py eval ${{ github.event.inputs.prompt_id }} --live
+      - name: Skip notice
+        if: env.ANTHROPIC_API_KEY == ''
+        run: echo "::notice::ANTHROPIC_API_KEY secret not set — live evals skipped."

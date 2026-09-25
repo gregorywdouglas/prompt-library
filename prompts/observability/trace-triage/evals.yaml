@@ -1,0 +1,34 @@
+cases:
+  - name: slow-downstream-dependency
+    vars:
+      symptom: "p95 latency 6.2s on POST /orders"
+      trace: |
+        trace_id=4bf92f3577b34da6a3ce929d0e0e4736
+        span=POST /orders            service=apim          dur=6180ms parent=-
+        span=orders-func invoke      service=orders-func   dur=6120ms parent=POST /orders
+        span=SQL SELECT inventory    service=orders-func   dur=40ms   parent=orders-func invoke
+        span=HTTP POST /pricing      service=orders-func   dur=5950ms parent=orders-func invoke status=OK http.status_code=200
+        span=servicebus send orders  service=orders-func   dur=30ms   parent=orders-func invoke
+    assert:
+      - type: contains
+        value: "## Verdict"
+      - type: contains
+        value: pricing
+      - type: contains
+        value: "## Next steps"
+
+  - name: broken-propagation-over-service-bus
+    vars:
+      symptom: "Consumer errors cannot be linked back to the originating API request"
+      architecture_notes: "APIM -> Function (producer) -> Service Bus -> Logic App (consumer)"
+      trace: |
+        trace_id=aaaa1111  span=POST /claims  service=apim       dur=210ms
+        trace_id=aaaa1111  span=sb send       service=claims-fn  dur=25ms  messaging.system=servicebus
+        trace_id=bbbb2222  span=sb receive    service=claims-la  dur=900ms status=ERROR parent=-
+    assert:
+      - type: contains
+        value: "## Propagation gaps"
+      - type: regex
+        value: "traceparent|diagnostic-id|context propagation"
+      - type: not_contains
+        value: "None detected"
